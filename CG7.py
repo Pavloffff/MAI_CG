@@ -4,7 +4,7 @@ from tkinter import Canvas
 class BezierCurve(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Bezier Curve")
+        self.title("Построение плоских полиномиальных кривых")
         self.geometry("800x600")
         self.canvas = Canvas(self, bg='white')
         self.canvas.pack(fill=tk.BOTH, expand=True)
