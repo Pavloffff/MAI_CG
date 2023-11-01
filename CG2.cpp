@@ -1,174 +1,264 @@
-// g++ CG2.cpp -lGLEW -lGL -lglfw -lglut
+// g++ CG2.cpp -lGLEW -lGL -lglfw -lglut -lGLU
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <GL/freeglut.h>
 #include <iostream>
+#include <vector>
+#include <GL/glu.h>
 
-int a = 1;
-double scale = 1.0; // Переменная масштабирования
-double centerX = 0.5; // Центр по X
-double centerY = 0.5; // Центр по Y
-
-struct Vertex {
+struct Vertex
+{
     float x, y, z;
 };
 
-struct Edge {
+struct Edge
+{
     int startVertexIndex, endVertexIndex;
 };
 
-struct Wedge {
-    Vertex vertices[6]; 
-    Edge edges[15]; 
+struct Wedge
+{
+    Vertex vertices[6];
+    Edge edges[15];
 };
 
-// Определение клина
-Wedge wedge = {
-    // Вершины
+class Figure
+{
+private:
+    Wedge wedge = {
+        {{0, 0, 0},
+         {1, 0, 0},
+         {0, 1, 0},
+         {0, 0, 1},
+         {1, 0, 1},
+         {0, 1, 1}},
+        {{0, 1},
+         {1, 2},
+         {2, 0},
+         {0, 3},
+         {1, 4},
+         {2, 5},
+         {3, 4},
+         {4, 5},
+         {5, 3}}};
+
+public:
+    Figure() {}
+
+    void deleteInvisibleLines()
     {
-        {0, 0, 0},
-        {1, 0, 0},
-        {0, 1, 0},
-        {0, 0, 1},
-        {1, 0, 1},
-        {0, 1, 1}
-    },
-    // Рёбра
+        glBegin(GL_TRIANGLES);
+        glVertex3f(wedge.vertices[0].x, wedge.vertices[0].y, wedge.vertices[0].z);
+        glVertex3f(wedge.vertices[1].x, wedge.vertices[1].y, wedge.vertices[1].z);
+        glVertex3f(wedge.vertices[2].x, wedge.vertices[2].y, wedge.vertices[2].z);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glVertex3f(wedge.vertices[3].x, wedge.vertices[3].y, wedge.vertices[3].z);
+        glVertex3f(wedge.vertices[4].x, wedge.vertices[4].y, wedge.vertices[4].z);
+        glVertex3f(wedge.vertices[5].x, wedge.vertices[5].y, wedge.vertices[5].z);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glVertex3f(wedge.vertices[2].x, wedge.vertices[2].y, wedge.vertices[2].z);
+        glVertex3f(wedge.vertices[4].x, wedge.vertices[4].y, wedge.vertices[4].z);
+        glVertex3f(wedge.vertices[5].x, wedge.vertices[5].y, wedge.vertices[5].z);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glVertex3f(wedge.vertices[2].x, wedge.vertices[2].y, wedge.vertices[2].z);
+        glVertex3f(wedge.vertices[3].x, wedge.vertices[3].y, wedge.vertices[3].z);
+        glVertex3f(wedge.vertices[5].x, wedge.vertices[5].y, wedge.vertices[5].z);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glVertex3f(wedge.vertices[0].x, wedge.vertices[0].y, wedge.vertices[0].z);
+        glVertex3f(wedge.vertices[3].x, wedge.vertices[3].y, wedge.vertices[3].z);
+        glVertex3f(wedge.vertices[4].x, wedge.vertices[4].y, wedge.vertices[4].z);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glVertex3f(wedge.vertices[0].x, wedge.vertices[0].y, wedge.vertices[0].z);
+        glVertex3f(wedge.vertices[1].x, wedge.vertices[1].y, wedge.vertices[1].z);
+        glVertex3f(wedge.vertices[4].x, wedge.vertices[4].y, wedge.vertices[4].z);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glVertex3f(wedge.vertices[0].x, wedge.vertices[0].y, wedge.vertices[0].z);
+        glVertex3f(wedge.vertices[2].x, wedge.vertices[2].y, wedge.vertices[2].z);
+        glVertex3f(wedge.vertices[3].x, wedge.vertices[3].y, wedge.vertices[3].z);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glVertex3f(wedge.vertices[1].x, wedge.vertices[1].y, wedge.vertices[1].z);
+        glVertex3f(wedge.vertices[2].x, wedge.vertices[2].y, wedge.vertices[2].z);
+        glVertex3f(wedge.vertices[4].x, wedge.vertices[4].y, wedge.vertices[4].z);
+        glEnd();
+
+
+    }
+
+    void Draw()
     {
-        {0, 1},
-        {1, 2},
-        {2, 0},
-        {0, 3},
-        {1, 4},
-        {2, 5},
-        {3, 4},
-        {4, 5},
-        {5, 3}
+        glBegin(GL_LINES);
+        for (const Edge &edge : wedge.edges)
+        {
+            const Vertex &startVertex = wedge.vertices[edge.startVertexIndex];
+            const Vertex &endVertex = wedge.vertices[edge.endVertexIndex];
+            glVertex3f(startVertex.x, startVertex.y, startVertex.z);
+            glVertex3f(endVertex.x, endVertex.y, endVertex.z);
+        }
+        glEnd();
     }
 };
 
-void drawWedge(const Wedge& wedge) {
-    glBegin(GL_LINES);
-    for (const Edge& edge : wedge.edges) {
-        const Vertex& startVertex = wedge.vertices[edge.startVertexIndex];
-        const Vertex& endVertex = wedge.vertices[edge.endVertexIndex];
-        glVertex3f(startVertex.x, startVertex.y, startVertex.z);
-        glVertex3f(endVertex.x, endVertex.y, endVertex.z);
-    }
-    glEnd();
-}
+class Output
+{
+private:
+    GLFWwindow *window;
+    Figure figure;
 
-void drawWedgeSurfaces(const Wedge& wedge) {
-    glBegin(GL_TRIANGLES);
-    glVertex3f(wedge.vertices[0].x, wedge.vertices[0].y, wedge.vertices[0].z);
-    glVertex3f(wedge.vertices[1].x, wedge.vertices[1].y, wedge.vertices[1].z);
-    glVertex3f(wedge.vertices[2].x, wedge.vertices[2].y, wedge.vertices[2].z);
-    glEnd();
+    bool deleteFlag = false;
+    float scaling = 5.0f;
+    float xAngle = 0.0f;
+    float yAngle = 0.0f;
 
-    glBegin(GL_TRIANGLES);
-    glVertex3f(wedge.vertices[3].x, wedge.vertices[3].y, wedge.vertices[3].z);
-    glVertex3f(wedge.vertices[4].x, wedge.vertices[4].y, wedge.vertices[4].z);
-    glVertex3f(wedge.vertices[5].x, wedge.vertices[5].y, wedge.vertices[5].z);
-    glEnd();
+public:
+    Output(int size)
+    {
+        if (!glfwInit())
+            exit(EXIT_FAILURE);
 
-    glBegin(GL_TRIANGLES);
-    glVertex3f(wedge.vertices[0].x, wedge.vertices[0].y, wedge.vertices[0].z);
-    glVertex3f(wedge.vertices[2].x, wedge.vertices[2].y, wedge.vertices[2].z);
-    glVertex3f(wedge.vertices[3].x, wedge.vertices[3].y, wedge.vertices[3].z);
-    glEnd();
+        window = glfwCreateWindow(size, size, "Каркасная визуализация выпуклого многогранника", NULL, NULL);
 
-    glBegin(GL_TRIANGLES);
-    glVertex3f(wedge.vertices[2].x, wedge.vertices[2].y, wedge.vertices[2].z);
-    glVertex3f(wedge.vertices[4].x, wedge.vertices[4].y, wedge.vertices[4].z);
-    glVertex3f(wedge.vertices[3].x, wedge.vertices[3].y, wedge.vertices[3].z);
-    glEnd();
+        if (!window)
+        {
+            glfwTerminate();
+            exit(EXIT_FAILURE);
+        }
 
-    glBegin(GL_TRIANGLES);
-    glVertex3f(wedge.vertices[1].x, wedge.vertices[1].y, wedge.vertices[1].z);
-    glVertex3f(wedge.vertices[2].x, wedge.vertices[2].y, wedge.vertices[2].z);
-    glVertex3f(wedge.vertices[4].x, wedge.vertices[4].y, wedge.vertices[4].z);
-    glEnd();
-}
+        glfwMakeContextCurrent(window);
 
-void windowResizeCallback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
-}
+        glfwSetWindowUserPointer(window, this);
 
-int main() {
+        glfwSetKeyCallback(window, keyCallback);
+        glfwSetWindowSizeCallback(window, resizeCallback);
 
-    std::cout << "Введите параметр масштабирования: ";
-    std::cin >> a;
-
-    int izoFlag = 0, deleteFlag = 0;
-
-    
-    std::cout << "Изометрическая / ортографическая проекция (1/0): ";
-    std::cin >> izoFlag;
-    std::cout << "\n";
-
-    std::cout << "Удалять / не удалять невидимые линии (1/0): ";
-    std::cin >> deleteFlag;
-    std::cout << "\n";
-
-    if (!glfwInit()) {
-        return -1;
+        figure = Figure();
     }
 
-    GLFWwindow* window = glfwCreateWindow(640, 480, "Каркасная визуализация выпуклого многогранника.", NULL, NULL);
-    if (!window) {
+    void start()
+    {
+        while (!glfwWindowShouldClose(window))
+        {
+            drawFrame();
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+        }
+
+        glfwDestroyWindow(window);
         glfwTerminate();
-        return -1;
     }
 
-    glfwMakeContextCurrent(window);
-    glewInit();
+    static void resizeCallback(GLFWwindow *window, int width, int height)
+    {
+        glViewport(0, 0, width, height);
+        glMatrixMode(GL_PROJECTION);
 
-    glfwSetWindowSizeCallback(window, windowResizeCallback);
-    glEnable(GL_DEPTH_TEST);
+        glLoadIdentity();
 
-    while (!glfwWindowShouldClose(window)) {
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        float aspectRatio = (float)width / (float)height;
+        gluPerspective(45.0f, aspectRatio, 1.0f, 100.0f);
+
+        glMatrixMode(GL_MODELVIEW);
+    }
+
+    static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+    {
+        Output *output = static_cast<Output *>(glfwGetWindowUserPointer(window));
+
+        if (action == GLFW_PRESS || action == GLFW_REPEAT)
+        {
+            switch (key)
+            {
+            case GLFW_KEY_KP_ADD:
+            case GLFW_KEY_EQUAL:
+                output->scaling -= 0.5f;
+                break;
+
+            case GLFW_KEY_KP_SUBTRACT:
+            case GLFW_KEY_MINUS:
+                output->scaling += 0.5f;
+                break;
+
+            case GLFW_KEY_S:
+                output->xAngle += 10.0f;
+                if (output->xAngle > 360.0f)
+                {
+                    output->xAngle = 0.0f;
+                }
+                break;
+
+            case GLFW_KEY_W:
+                output->xAngle -= 10.0f;
+                if (output->xAngle < 0.0f)
+                {
+                    output->xAngle = 360.0f;
+                }
+                break;
+
+            case GLFW_KEY_D:
+                output->yAngle += 10.0f;
+                if (output->yAngle > 360.0f)
+                {
+                    output->yAngle = 0.0f;
+                }
+                break;
+
+            case GLFW_KEY_A:
+                output->yAngle -= 10.0f;
+                if (output->yAngle < 0.0f)
+                {
+                    output->yAngle = 360.0f;
+                }
+                break;
+            
+            case GLFW_KEY_SPACE:
+                output->deleteFlag = !output->deleteFlag;
+                break;
+
+            default:
+                break;
+            }
+        }
+    }
+
+    void drawFrame()
+    {
+        glLoadIdentity();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glLoadIdentity();
+        glTranslatef(0.0, 0.0, -scaling);
 
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
-        glViewport(0, 0, width, height);
+        glRotatef(xAngle, 1.0, 0.0, 0.0);
+        glRotatef(yAngle, 0.0, 1.0, 0.0);
 
-        double aspect = (double)width / (double)height;
-
-        // Устанавливаем масштабирование и центрирование
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        double halfWidth = 2.0 * a * scale; 
-        double halfHeight = 2.0 * a * scale / aspect;
-        glOrtho(centerX - halfWidth, centerX + halfWidth, centerY - halfHeight, centerY + halfHeight, -10.0, 10.0);
-        glMatrixMode(GL_MODELVIEW);
-
-        if (izoFlag) {
-            glRotatef(45, 0.0, 1.0, 0.0);
-            glRotatef(-35.264, 1.0, 0.0, 0.0);
-        }
-
-        if (deleteFlag) {
-            glColor3f(1.0f, 1.0f, 1.0f); // Цвет фона
-            drawWedgeSurfaces(wedge);
-        }
-
-        glColor3f(0.0, 0.0, 1.0); // Цвет рёбер
-
+        GLfloat matAmbientAndDiffuse[] = {0.8f, 0.0f, 0.2f, 1.0f};
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbientAndDiffuse);
         glColor3f(0.0, 0.0, 1.0);
-        glLineWidth(5.0);
-
-        drawWedge(wedge);
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+        glLineWidth(3.0);
+        figure.Draw();
+        if (deleteFlag) {
+            figure.deleteInvisibleLines();
+        }
     }
+};
 
-    glfwTerminate();
+int main()
+{
+    Output app(800);
+    app.start();
     return 0;
 }
