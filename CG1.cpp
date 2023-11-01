@@ -52,12 +52,41 @@ void drawPolarAxes(int numCircles) {
     }
 
     // Рисуем лучи (линии, идущие от центра наружу на каждые 30 градусов, например)
-    for (int i = 0; i < numRays; ++i) {
+    for (int i = 0; i <= numRays; ++i) {
         double angle = i * 2 * M_PI / numRays; // радианы
         glBegin(GL_LINES);
         glVertex2d(0.0, 0.0); // начало в центре
         glVertex2d(numCircles * 0.2 * cos(angle), numCircles * 0.2 * sin(angle));
         glEnd();
+
+        // Подписываем лучи
+        string label;
+        switch (i) {
+            case 0: label = "0"; break;
+            case 1: label = "30"; break;
+            case 2: label = "60"; break;
+            case 3: label = "90"; break;
+            case 4: label = "120"; break;
+            case 5: label = "150"; break;
+            case 6: label = "180"; break;
+            case 7: label = "210"; break;
+            case 8: label = "240"; break;
+            case 9: label = "270"; break;
+            case 10: label = "300"; break;
+            case 11: label = "330"; break;    
+            default: label = "";
+        }
+        if (angle <= M_PI / 2 || angle >= (3 * M_PI) / 2) {
+            glRasterPos2f(1.1 * numCircles * 0.2 * cos(angle), 1.1 * numCircles * 0.2 * sin(angle));
+            for (char &c : label) {
+                glutBitmapCharacter(GLUT_BITMAP_9_BY_15, c);
+            }
+        } else {
+            glRasterPos2f(1.1 * numCircles * 0.2 * cos(angle), 1.1 * numCircles * 0.2 * sin(angle));
+            for (char &c : label) {
+                glutBitmapCharacter(GLUT_BITMAP_9_BY_15, c);
+            }
+        }
     }
 }
 
